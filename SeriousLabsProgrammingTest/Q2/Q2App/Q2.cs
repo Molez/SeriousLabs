@@ -32,7 +32,8 @@
          * that spot is the closest spot. Then we have to determine if that point it between start/end or outside. If its between then it is the shortest point. If its outside then
          * its start if its less than start or its end if its greater than end. 
          * 
-         * I think there is a way to project 3D points into a 2D plane (probably how they do normal mapping) but I am not going there unless I have to. 
+         * I think there is a way to project 3D points into a 2D plane (probably how they do normal mapping) solve the problem and then return back to the 3D space but I am not 
+         * 100% sure how to do this. 
          **/
         public static Vec3 GetNearestPointOnSegment(Vec3 point, Vec3 start, Vec3 end)
         {
@@ -57,11 +58,13 @@
 
         private static double GetLambdaN(Vec3 point, Vec3 start, Vec3 end)
         {
+            //Stubbed so things compile
             return 1;
 ;        }
 
         private static Vec3 GetN(Vec3 start, Vec3 end, double lambdaN)
         {
+            //Stubbed so things compile
             return new Vec3(1, 2, 3);
         }
 

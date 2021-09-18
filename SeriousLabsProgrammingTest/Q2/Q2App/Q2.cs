@@ -57,12 +57,12 @@
 
         private static double GetLambdaN(Vec3 point, Vec3 start, Vec3 end)
         {
-
-        }
+            return 1;
+;        }
 
         private static Vec3 GetN(Vec3 start, Vec3 end, double lambdaN)
         {
-
+            return new Vec3(1, 2, 3);
         }
 
         private static Vec3 VecSubtract(Vec3 first, Vec3 second)

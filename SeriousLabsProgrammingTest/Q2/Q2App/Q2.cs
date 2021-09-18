@@ -23,7 +23,7 @@
          * I have not done this sort of thing for a long while so making my best judgement on how this can be done and maybe making some missleading assumptions. We will see.
          * I know that two points in 3D space just create an edge and that adding a 3rd point means we can create a face. its direction in 3d space will be dependant
          * on the position of all 3 vertices but the resulting plane will essentially be a 2d plane, at least in relation to itself. So I hope I can mostly solve this in the
-         * same way you would solve the problem in 2D using x,y only. I am just going to assume this will work with the z direction so long as I do my vert math properly. 
+         * same way you would solve the problem in 2D using x,y only.
          * 
          * I am using this as my basic understanding of how to do this in 2D space
          * https://diego.assencio.com/?index=ec3d5dfdfc0b6a0d147a656f0af332bd#mjx-eqn-post_ec3d5dfdfc0b6a0d147a656f0af332bd_lambda_closest_point_line_to_point

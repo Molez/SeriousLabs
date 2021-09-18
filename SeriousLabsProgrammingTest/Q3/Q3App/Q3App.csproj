@@ -41,8 +41,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SpellEffects\Buffs\Buff.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="SpellEffects\Buffs\Concentration.cs" />
+    <Compile Include="SpellEffects\Buffs\Strength.cs" />
+    <Compile Include="SpellEffects\Debuffs\Debuff.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpellEffects\Debuffs\Paralysis.cs" />
+    <Compile Include="SpellEffects\Debuffs\Weakness.cs" />
+    <Compile Include="SpellEffects\INoAction.cs" />
+    <Compile Include="SpellEffects\IStrengthModifier.cs" />
+    <Compile Include="SpellEffects\SpellEffect.cs" />
+    <Compile Include="Spells\Spell.cs" />
+    <Compile Include="Spells\DispellMagic.cs" />
+    <Compile Include="Spells\OgreStrength.cs" />
+    <Compile Include="Spells\Paralyze.cs" />
+    <Compile Include="Spells\CurseOfWeakness.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

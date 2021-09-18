@@ -1,4 +1,10 @@
-﻿using System.Linq;
+﻿using Q3App.SpellEffects.Buffs;
+using Q3App.SpellEffects.Debuffs;
+using Q3App.Spells;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Q3App.SpellEffects;
 
 namespace Q3App
 {
@@ -12,11 +18,17 @@ namespace Q3App
 
         //Could have also used { get; set; } to save some space
         private string Name;
+        private Guid Id; // In-case we need to identify two characters and see if they are the same
         private int Level;
         private int Health;
         private int Armour;
         private int Strength;
         private int TotalExperience;
+
+        private IEnumerable<Spell> SpellBook;
+
+        private IList<Buff> Buffs;
+        private IList<Debuff> Debuffs;
 
         public Character(string name)
         {
@@ -27,11 +39,28 @@ namespace Q3App
             Strength = 10;
             TotalExperience = 0;
             Name = name;
+            Id = Guid.NewGuid();
+            SpellBook = new List<Spell> //Might want to make this a set unless duped spells make sense.
+            {
+                new OgreStrength(this),
+                new CurseOfWeakness(this),
+                new Paralyze(this),
+                new DispellMagic(this)
+            };
+
+            Buffs = new List<Buff>();
+            Debuffs = new List<Debuff>();
         }
 
+        #region Getters and Setters
         public string GetName()
         {
             return Name;
+        }
+
+        public string GetId()
+        {
+            return Id.ToString();
         }
 
         public int GetTotalExperience()
@@ -51,16 +80,32 @@ namespace Q3App
         {
             return Armour;
         }
-        public int GetStrength()
+
+        public int GetBaseStrength()
         {
             return Strength;
+
         }
+        public int GetStrength()
+        {
+            CheckBuffsAndDebuff();
+            return GetModifiedStrength();
+        }
+        #endregion
 
         //Armor values are applied by the character upon receiving of damgae. The called should submit its
         //raw damage value here.
         public void ApplyDamage(int rawDamage)
         {
             var mitigatedDamage = rawDamage - Armour;
+           
+            mitigatedDamage = mitigatedDamage >= 0 ? mitigatedDamage : 0; //Quick fix for no negative healing damage. Armor is no longer a healing stat :D
+
+            if (Health > 0 && mitigatedDamage > 0)
+            {
+                ClearConcentration();
+            }
+
             Health = mitigatedDamage > Health ? 0 : Health - mitigatedDamage;
         }
 
@@ -81,6 +126,26 @@ namespace Q3App
                 //every time.
                 LevelUp();
             }
+        }
+
+        public void CastSpell(string spellId, Character target)
+        {
+            //Only cast if we can perform actions and the spell id is in our spell book.
+            if (CanPerformAction() && SpellBook.Any(spell => spell.GetSpellId() == spellId))
+            {
+                var spellToCast = SpellBook.Single(spell => spell.GetSpellId() == spellId);
+                spellToCast.Cast(target);
+            }
+        }
+
+        public bool CanPerformAction()
+        {
+            CheckBuffsAndDebuff();
+
+            var hasNoActionBuffs = Buffs.Any(buff => buff is INoAction);
+            var hasNoActionDebuffs = Debuffs.Any(debuff => debuff is INoAction);
+            
+            return !hasNoActionBuffs && !hasNoActionDebuffs;
         }
 
         private void LevelUp()
@@ -126,9 +191,9 @@ namespace Q3App
             //way to be health 0 and not unconcious. 
             //
             //So only do things if the enemies health is over 0
-            if (otherCharacter.GetHealth() > 0)
+            if (CanPerformAction() && otherCharacter.GetHealth() > 0)
             {
-                otherCharacter.ApplyDamage(Strength); //Other character will handle their armor mitigation
+                otherCharacter.ApplyDamage(GetStrength()); //Other character will handle their armor mitigation
                 
                 if(otherCharacter.GetHealth() <= 0)
                 {
@@ -137,6 +202,74 @@ namespace Q3App
                 }
             }
         }
-    }
 
+        private int GetModifiedStrength()
+        {
+            //Apply the buffs to our base strenght
+            var buffedStrength = Buffs.Where(buff => buff is IStrengthModifier)
+                                      .Aggregate(Strength, (aggregate, next) => ((IStrengthModifier)next).GetModifiedStrenght(aggregate));
+            //Take our buffed strength and debuff it
+            return Debuffs.Where(debuff => debuff is IStrengthModifier)
+                          .Aggregate(buffedStrength, (aggregate, next) => ((IStrengthModifier)next).GetModifiedStrenght(aggregate));
+        }
+
+        private void CheckBuffsAndDebuff()
+        {
+            var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+            //We are not handling any spell linking here but we probably will have to. For now the linked spells should share the same
+            //expiration so they should fall off together for the most part.
+
+            //Clear any buffs that are expired
+            var expiredBuffs = Buffs.Where(buff => buff.GetExpirationTime() > now).ToList();
+            foreach(var buff in expiredBuffs)
+            {
+                buff.ResolveBuffRemoval();
+                Buffs.Remove(buff);
+            }
+            
+            //Clear any debuffs that are expired
+            Debuffs = Debuffs.Where(debuff => debuff.GetExpirationTime() > now).ToList();
+        }
+
+        public void AddBuff(Buff buff)
+        {
+            Buffs.Add(buff);
+        }
+
+        public void ClearAllBuffs()
+        {
+            foreach(var buff in Buffs)
+            {
+                buff.ResolveBuffRemoval();
+            }
+
+            Buffs.Clear();
+        }
+
+        public void AddDebuff(Debuff debuff)
+        {
+            Debuffs.Add(debuff);
+        }
+
+        public void RemoveDebuff(Debuff debuff)
+        {
+            Debuffs.Remove(debuff);
+        }
+
+        public void ClearAllDebuffs()
+        {
+            Debuffs.Clear();
+        }
+
+        public void ClearConcentration()
+        {
+            var concentrationBuffs = Buffs.Where(buff => buff is Concentration).ToList();
+
+            foreach (var concentrationBuff in concentrationBuffs)
+            {
+                concentrationBuff.ResolveBuffRemoval();
+                Buffs.Remove(concentrationBuff);
+            }
+        }
+    }
 }

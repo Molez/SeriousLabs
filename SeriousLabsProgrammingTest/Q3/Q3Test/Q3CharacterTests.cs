@@ -170,8 +170,6 @@ namespace Q3Test
             Assert.AreEqual(10000000 + 10, _testProtagonist.GetTotalExperience());
         }
 
-        //            _testProtagonist.GainExperience(2550000);
-
         [Test]
         public void GainRightExpOnKnockout()
         {

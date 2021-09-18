@@ -12,7 +12,12 @@
 
         public int GetModifiedStrenght(int baseStrength)
         {
-            return baseStrength + STRENGHT_MODIFIER;
+            return baseStrength - STRENGHT_MODIFIER;
+        }
+
+        public override void ResolveDebuffRemoval()
+        {
+            //No-op
         }
     }
 }

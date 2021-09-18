@@ -1,5 +1,4 @@
 ﻿using Q3App.SpellEffects.Debuffs;
-using System;
 
 namespace Q3App.Spells
 {
@@ -20,7 +19,7 @@ namespace Q3App.Spells
 
         public override string GetSpellId()
         {
-            throw new NotImplementedException();
+            return SPELL_ID;
         }
     }
 }

@@ -128,14 +128,28 @@ namespace Q3App
             }
         }
 
-        public void CastSpell(string spellId, Character target)
+        //Returns true if a spell was cast and false if not. This could be because the character cannot perform an action or
+        //it does not know the spell.
+        public bool CastSpell(string spellId, Character target)
         {
+            var didCast = false;
             //Only cast if we can perform actions and the spell id is in our spell book.
-            if (CanPerformAction() && SpellBook.Any(spell => spell.GetSpellId() == spellId))
+            //In theory you would need to return some sort of error if nothing was cast so that 
+            //the caller would know.
+            if (CanPerformAction() && CanCastSpell(spellId))
             {
                 var spellToCast = SpellBook.Single(spell => spell.GetSpellId() == spellId);
                 spellToCast.Cast(target);
+
+                didCast = true;
             }
+
+            return didCast;
+        }
+
+        public bool CanCastSpell(string spellId)
+        {
+            return SpellBook.Any(spell => spell.GetSpellId() == spellId);
         }
 
         public bool CanPerformAction()
@@ -220,7 +234,7 @@ namespace Q3App
             //expiration so they should fall off together for the most part.
 
             //Clear any buffs that are expired
-            var expiredBuffs = Buffs.Where(buff => buff.GetExpirationTime() > now).ToList();
+            var expiredBuffs = Buffs.Where(buff => buff.GetExpirationTime() <= now).ToList();
             foreach(var buff in expiredBuffs)
             {
                 buff.ResolveBuffRemoval();
@@ -258,6 +272,10 @@ namespace Q3App
 
         public void ClearAllDebuffs()
         {
+            foreach (var debuff in Debuffs)
+            {
+                debuff.ResolveDebuffRemoval();
+            }
             Debuffs.Clear();
         }
 
@@ -270,6 +288,16 @@ namespace Q3App
                 concentrationBuff.ResolveBuffRemoval();
                 Buffs.Remove(concentrationBuff);
             }
+        }
+
+        public IEnumerable<Buff> GetBuffs()
+        {
+            return Buffs;
+        }
+
+        public IEnumerable<Debuff> GetDebuffs()
+        {
+            return Debuffs;
         }
     }
 }

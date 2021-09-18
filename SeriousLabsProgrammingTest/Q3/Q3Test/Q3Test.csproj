@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Q3CharacterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Q3SpellTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
